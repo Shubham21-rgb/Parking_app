@@ -1,0 +1,17 @@
+# ==========================
+# PYTHON / FLASK
+# ==========================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment folders
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+.python-version
