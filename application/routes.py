@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 @app.route('/',methods=['GET'])
 def home():
     return render_template('index.html')
+
+    
 def roles_list(roles):
     role_list=[]
     for role in roles:
@@ -33,11 +35,6 @@ def admin_home():
 @roles_accepted('user','admin')
 def userhome():
     user=current_user
-    if "user" in  roles_list(user.roles):
-        if not db.session.query(User).filter_by(user_id=user.id).first():
-            ser=Customer(user_id=user.id)
-            db.session.add(ser)
-            db.session.commit()
     return jsonify({
         "id":user.id,
         "email":user.email,

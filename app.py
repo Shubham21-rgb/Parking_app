@@ -19,7 +19,7 @@ def create_app():
     app.app_context().push()
     return app
 app=create_app()
-''''celery=celery_init_app(app)
+'''celery=celery_init_app(app)
 celery.autodiscover_tasks()'''
 
 with app.app_context():
