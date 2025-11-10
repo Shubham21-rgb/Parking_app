@@ -1,269 +1,149 @@
 import cusnav from "./cusnav.js"
-export default{
-    components:{
-        'n':cusnav
-    },
-    template:`
-    <div>
-    <n></n>
-    <h2>Welcome {{userData.username}} Customer</h2>
-    <div class="row border">
-            <div class="text-center"><router-link to="/customersearch" class="btn btn-success"><i class="fas fa-search">----------------------------Search----------------------------</i> </router-link></div>
+export default {
+  components: {
+    'n': cusnav
+  },
+  template: `
+<div class="container py-4">
+  <n></n>
+
+  <div class="mb-4 text-center">
+    <h2 class="fw-bold text-primary">User Dashboard</h2>
+    <p class="text-muted">Manage all your parking reservations.</p>
+  </div>
+
+  <!-- Message -->
+  <div v-if="message" class="alert alert-info text-center">{{ message }}</div>
+
+  <!-- ACTIVE RESERVATIONS -->
+  <div v-if="activeReservations.length" class="mb-5">
+    <h4 class="fw-bold text-success mb-3">Active Reservations</h4>
+    <div class="row">
+      <div v-for="res in activeReservations" :key="res.id" class="col-md-6 mb-3">
+        <div class="card shadow-sm border-success rounded-4">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">{{ res.lot_name }}</h5>
+          </div>
+          <div class="card-body">
+            <p><strong>Spot:</strong> {{ res.spot_number }}</p>
+            <p><strong>Start:</strong> {{ res.parking_timestamp }}</p>
+            <p><strong>Status:</strong> {{ res.booking_status }}</p>
+            <p><strong>Payment:</strong> {{ res.payment_status }}</p>
+
+            <button class="btn btn-danger w-100 mt-2" @click="releaseSpot(res.id)">
+              <i class="bi bi-x-circle me-2"></i> Release Spot
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="row border">
-        <div class="col-7 border" style="height: 750px; overflow-y:scroll">
-            <h2>Services Available</h2>
-            <div v-for="t in service" class="card">
-                <div v-if="t.Service_name == 'Household Cleaning'">
-                    <p><mark>{{t.Service_name}}</mark></p>
-                    <div class="card-body">
-                        <h5 class="card-title">Service</h5>
-                        <p class="card-text">ID: {{t.id}}</p>
-                        <p class="card-text">Time Required: {{t.Time_required}}</p>
-                        <p class="card-text">About: {{t.Description}}</p>
-                        <p class="card-text">Amount: {{t.amount}} </p>
-                        <router-link :to="{name:'show',params:{id: t.id,amount: t.amount,service_name:t.Service_name}}" class="btn btn-success">Select</router-link>
-                    </div>
-                </div>
-                <div v-if="t.Service_name == 'Household Electricals'">
-                    <p><mark>{{t.Service_name}}</mark></p>
-                    <div class="card-body">
-                        <h5 class="card-title">Service</h5>
-                        <p class="card-text">ID: {{t.id}}</p>
-                        <p class="card-text">Time Required: {{t.Time_required}}</p>
-                        <p class="card-text">About: {{t.Description}}</p>
-                        <p class="card-text">Amount: {{t.amount}} </p>
-                        <router-link :to="{name:'show',params:{id: t.id,amount: t.amount,service_name:t.Service_name}}" class="btn btn-success">Select</router-link>
-                    </div>
-                </div>
-                <div v-if="t.Service_name == 'Household Sanitary'">
-                    <p><mark>{{t.Service_name}}</mark></p>
-                    <div class="card-body">
-                        <h5 class="card-title">Service</h5>
-                        <p class="card-text">ID: {{t.id}}</p>
-                        <p class="card-text">Time Required: {{t.Time_required}}</p>
-                        <p class="card-text">About: {{t.Description}}</p>
-                        <p class="card-text">Amount: {{t.amount}} </p>
-                        <router-link :to="{name:'show',params:{id:t.id,amount:t.amount,service_name:t.Service_name}}" class="btn btn-success">Select</router-link>
-                    </div>
-                </div>
-                <div v-if="t.Service_name == 'Household Security'">
-                    <p><mark>{{t.Service_name}}</mark></p>
-                    <div class="card-body">
-                        <h5 class="card-title">Service</h5>
-                        <p class="card-text">ID: {{t.id}}</p>
-                        <p class="card-text">Time Required: {{t.Time_required}}</p>
-                        <p class="card-text">About: {{t.Description}}</p>
-                        <p class="card-text">Amount: {{t.amount}} </p>
-                        <router-link :to="{name:'show',params:{id:t.id,amount:t.amount,service_name:t.Service_name}}" class="btn btn-success">Select</router-link>
-                    </div>
-                </div>
-                <div v-if="t.Service_name == 'Household Garderning'">
-                    <p><mark>{{t.Service_name}}</mark></p>
-                    <div class="card-body">
-                        <h5 class="card-title">Service</h5>
-                        <p class="card-text">ID: {{t.id}}</p>
-                        <p class="card-text">Time Required: {{t.Time_required}}</p>
-                        <p class="card-text">About: {{t.Description}}</p>
-                        <p class="card-text">Amount: {{t.amount}} </p>
-                        <router-link :to="{name:'show',params:{id:t.id,amount:t.amount,service_name:t.Service_name}}" class="btn btn-success">Select</router-link>
-                    </div>
-                </div>
-            </div>
+  </div>
+
+  <!-- AVAILABLE PARKING LOTS -->
+  <h4 class="fw-bold text-primary mb-3">Available Parking Lots</h4>
+  <div class="row">
+    <div v-for="lot in lots" :key="lot.id" class="col-md-6 mb-4">
+      <div class="card shadow-sm rounded-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">{{ lot.prime_location_name }}</h5>
         </div>
-    <div class="col-5 border" style="height: 750px;overflow-y:scroll;overflow-x:scroll">
-    <h4>Service History</h4>
-        <p>Accepted Services</p>
-        <div v-for="t in transactions" v-if="t.status=='Accepted'" class="card mt-2">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">Customer ID</th>
-                        <th scope="col">Date of Request</th>
-                        <th scope="col">Date of completion</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Service ID</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <td>{{t.customer_id}}</td>
-                    <td>{{t.Date_of_Request}}</td>
-                    <td>{{t.Date_of_completion}}</td>
-                    <td>{{t.amount}}</td>
-                    <td>{{t.service_id}}</td>
-                    <td>
-                        <router-link :to="{name:'cpay',params:{id: t.id,status: t.status}}" class="btn btn-warning">Pay</router-link>
-                    </td>
-                </tbody>
-            </table>
+        <div class="card-body">
+          <p><strong>Address:</strong> {{ lot.address }}, {{ lot.city }}</p>
+          <p><strong>Price/hour:</strong> ₹{{ lot.price_per_hour }}</p>
+          <p><strong>Available Spots:</strong> {{ lot.available_spots }}</p>
+
+          <button class="btn btn-success w-100 mt-2"
+                  :disabled="lot.available_spots === 0"
+                  @click="proceedToPayment(lot)">
+            <i class="bi bi-cash-coin me-2"></i> Book Spot (Pay)
+          </button>
         </div>
-        <p>Completed Services</p>
-        <div v-for="t in transactions" v-if="t.status=='Completed'" class="card mt-2">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">Customer ID</th>
-                        <th scope="col">Date of Request</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Service ID</th>
-                        <th scope="col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <td>{{t.customer_id}}</td>
-                        <td>{{t.Date_of_Request}}</td>
-                        <td>{{t.amount}}</td>
-                        <td>{{t.service_id}}</td>
-                        <td>
-                            <router-link :to="{name:'cusrate',params:{id: t.id}}" class="btn btn-warning">Rate</router-link>
-                        </td>
-                    </tbody>
-                </table>
-            </div>
-            <p>Pending Services</p>
-            <div v-for="t in transactions" v-if="t.status=='Pending'" class="card mt-2">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th scope="col">Customer ID</th>
-                            <th scope="col">Date of Request</th>
-                            <th scope="col">Date of completion</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Service ID</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <td>{{t.customer_id}}</td>
-                        <td>{{t.Date_of_Request}}</td>
-                        <td>{{t.Date_of_completion}}</td>
-                        <td>{{t.amount}}</td>
-                        <td>{{t.service_id}}</td>
-                        <td>
-                            <router-link :to="{name:'cancel',params:{id: t.id,status: t.status}}" class="btn btn-warning">Cancel</router-link>
-                        </td>
-                    </tbody>
-                </table>
-            </div>
-            <p>Closed Services</p>
-            <div v-for="t in transactions" v-if="t.status=='Closed'" class="card mt-2">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th scope="col">Customer ID</th>
-                            <th scope="col">Date of Request</th>
-                            <th scope="col">Date of completion</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Service ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <td>{{t.customer_id}}</td>
-                        <td>{{t.Date_of_Request}}</td>
-                        <td>{{t.Date_of_completion}}</td>
-                        <td>{{t.amount}}</td>
-                        <td>{{t.service_id}}</td>
-                    </tbody>
-                </table>
-            </div>
-            <p>Rejected Services</p>
-            <div v-for="t in transactions" v-if="t.status=='Rejected'" class="card mt-2">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th scope="col">Customer ID</th>
-                            <th scope="col">Date of Request</th>
-                            <th scope="col">Date of completion</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Service ID</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <td>{{t.customer_id}}</td>
-                        <td>{{t.Date_of_Request}}</td>
-                        <td>{{t.Date_of_completion}}</td>
-                        <td>{{t.amount}}</td>
-                        <td>{{t.service_id}}</td>
-                        <td>
-                            <button @click="del" class="btn btn-info btn-sm">Delete</button>
-                        </td>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      </div>
     </div>
-</div>`,
-    data: function(){
-        return{
-            userData:"",
-            transactions:null,
-            message:"",
-            service:null,
-            ser:null
-        }
+  </div>
+
+  <!-- HISTORY -->
+  <hr class="my-5">
+  <h4 class="fw-bold text-secondary">Reservation History</h4>
+  <table class="table table-bordered mt-3">
+    <thead class="table-light">
+      <tr>
+        <th>Lot</th>
+        <th>Spot</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Status</th>
+        <th>Payment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="r in history" :key="r.id">
+        <td>{{ r.lot_name }}</td>
+        <td>{{ r.spot_number }}</td>
+        <td>{{ r.parking_timestamp }}</td>
+        <td>{{ r.leaving_timestamp || '-' }}</td>
+        <td>{{ r.booking_status }}</td>
+        <td>{{ r.payment_status }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+`,
+  data() {
+    return {
+      lots: [],
+      activeReservations: [],
+      history: [],
+      message: ""
+    };
+  },
+  mounted() {
+    this.fetchLots();
+    this.fetchReservations();
+  },
+  methods: {
+    fetchLots() {
+      fetch('/api/user/parking-lots', {
+        headers: { "Authentication-Token": localStorage.getItem("auth_token") }
+      })
+      .then(r => r.json())
+      .then(data => {
+        this.lots = data.lots || [];
+      });
     },
-    mounted(){ 
-        this.loadTrans()
-        this.loadUser()
-        this.loadser()
-        this.loadsers()
+
+    fetchReservations() {
+      fetch('/api/user/reservations', {
+        headers: { "Authentication-Token": localStorage.getItem("auth_token") }
+      })
+      .then(r => r.json())
+      .then(data => {
+        this.activeReservations = data.active || [];
+        this.history = data.history || [];
+      });
     },
-    methods:{
-        loadUser(){
-            fetch('/api/home',{
-                method:'GET',  
-                headers:{
-                    "Content-Type":'application/json',
-                    "Authentication-Token":localStorage.getItem("auth_token")
-                }
-            }).then(response => response.json())
-            .then(data => this.userData=data)
-        },
-        loadTrans(){
-            fetch('/api/get',{
-                method:'GET',
-                headers:{
-                    "Content-Type":'application/json',
-                    "Authentication-Token":localStorage.getItem("auth_token")
-                }
-            }).then(response => response.json())
-            .then(data =>this.transactions=data)
-        },
-        loadser(){
-            fetch('/api/getser',{
-                method:'POST',
-                headers:{
-                    "Content-Type":'application/json',
-                    "Authentication-Token":localStorage.getItem("auth_token")
-                }
-            }).then(response => response.json())
-            .then(data => 
-                this.service=data)
-        },
-        pay(){
 
-        },
-        del(){
+    proceedToPayment(lot) {
+      localStorage.setItem("selected_lot", JSON.stringify(lot));
+      this.$router.push('/payment');
+    },
 
+    releaseSpot(reservation_id) {
+      fetch('/api/user/release', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "Authentication-Token": localStorage.getItem("auth_token")
         },
-        loadsers(){
-            fetch('/api/getsers',{
-                method:'POST',
-                headers:{
-                    "Content-Type":'application/json'
-
-                }
-            }).then(response => response.json())
-            .then(data => 
-                this.ser=data)
-        },
-        close(){
-            
-        },
-        rate(){
-
-        }
-    }                                      
+        body: JSON.stringify({ reservation_id })
+      })
+      .then(r => r.json())
+      .then(data => {
+        this.message = data.message;
+        this.fetchLots();
+        this.fetchReservations();
+      });
+    }
+  }
 }
